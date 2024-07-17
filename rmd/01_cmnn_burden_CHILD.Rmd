@@ -5,11 +5,14 @@
 pacman::p_load(tidyverse, knitr, here)
 
 # Import the communicable diseases data
-data_cmnn <- read_csv(here("data/burden-of-disease-cmnn.csv"))
+data_cmnn <- read_csv(here("data/burden-of-disease-cmnn.csv")) %>% 
+  rename(daly_cmnn = `DALYs (Disability-Adjusted Life Years) - Communicable, maternal, neonatal, and nutritional diseases - Sex: Both - Age: Age-standardized (Rate)`)
 ```
 
 ```{r}
 # Filter the dataset to include only the three countries chosen by your group.
+data_cmnn_filtered <- data_cmnn %>% 
+  filter(Entity %in% c("Germany", "Canada", "India"))
 ```
 
 ## Table of Estimates for CMNN Burden Over Time
@@ -17,15 +20,24 @@ data_cmnn <- read_csv(here("data/burden-of-disease-cmnn.csv"))
 ```{r}
 # Here render a table for the DALY burden over time for the three countries.
 # You should pivot the data to show each country in a separate column.
+data_cmnn_wide <- data_cmnn_filtered %>% 
+  select(-Code) %>% 
+  pivot_wider(names_from = Entity, values_from = daly_cmnn)
 # Use kable() from the knitr package to render the table.
+
+kable(data_cmnn_wide)
 ```
 
 ## Plot Showing Trends in CMNN Burden Over Time
 
 ```{r}
 # Here, plot a line graph showing the trend of DALY burden for the chosen countries over time. You can use ggplot2 to create this plot. Each country's line should be a different color.
+
+data_cmnn_filtered %>% 
+  ggplot(aes(x = Year, y = daly_cmnn, group = Entity, col = Entity))+
+  geom_line()+
+  scale_y_log10()
 ```
 
 ## Summary of CMNN Burden Findings
-
-Provide a brief analysis based on the data presented in the table and chart. Highlight any significant findings or patterns. About 3 sentences.
+The DALY CMNN burden has decreased between 1990 and 2019 in all three countries analyzed. Whereas Germany and Canada had a rather low DALY CMNN of under 2000 in 1990, it was over 30,000 in India. While the score decreased constantly in India in Germany, there is a plateau in Canada from 1990 to 1995, with a decrease afterwards.
